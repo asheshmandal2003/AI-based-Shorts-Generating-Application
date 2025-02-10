@@ -3,15 +3,49 @@ import SelectContentType from "./_components/SelectContentType";
 import SelectStyle from "./_components/SelectStyle";
 import SelectDuration from "./_components/SelectDuration";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
+import { useState } from "react";
+import axios from "axios";
 
 function Create() {
+  const [values, setValues] = useState({
+    topic: "",
+    style: "",
+    duration: "",
+  });
+  const [loading, setLoading] = useState(() => false);
+
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
       ...prevValues,
       [fieldName]: fieldValue,
     }));
   }
+
+  const getVideoScript = async () => {
+    setLoading(true);
+    const prompt = `Write a script to generate a ${values.duration}-second video on the topic: ${values.topic} in ${values.style} format for each scene and give me result in JSON format with image Prompt and Content text as field`;
+
+    const result = await axios
+      .post("/api/get-video-script", {
+        prompt,
+      })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setValues({
+          topic: "",
+          style: "",
+          duration: "",
+        });
+        setLoading(false);
+      });
+  };
+
   return (
     <div>
       <h1 className="font-bold text-2xl mb-8">Create a New Short Video</h1>
@@ -49,8 +83,16 @@ function Create() {
           <SelectDuration handleValueChange={handleValueChange} />
         </div>
 
-        <Button size="lg">
-          <PlusCircle /> Generate Video
+        <Button size="lg" onClick={() => getVideoScript()} disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin" /> Generating Video
+            </>
+          ) : (
+            <>
+              <PlusCircle /> Generate Video
+            </>
+          )}
         </Button>
       </div>
     </div>

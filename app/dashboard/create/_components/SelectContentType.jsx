@@ -60,7 +60,7 @@ function SelectContentType({ handleValueChange }) {
       <Select
         onValueChange={(value) => {
           setSelectedContentType(value);
-          handleValueChange("topic", value);
+          selectedContentType !== "Custom" && handleValueChange("topic", value);
         }}
       >
         <SelectTrigger className="w-full">
