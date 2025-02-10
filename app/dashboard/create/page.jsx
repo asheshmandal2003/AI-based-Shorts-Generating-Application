@@ -15,6 +15,7 @@ function Create() {
     duration: "",
   });
   const [loading, setLoading] = useState(() => false);
+  const [audioURL, setAudioURL] = useState(() => null);
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -55,7 +56,7 @@ function Create() {
         text: audioScript,
       })
       .then((res) => {
-        console.log(res.data);
+        setAudioURL(res.data.message);
       })
       .catch((err) => {
         console.log(err);
