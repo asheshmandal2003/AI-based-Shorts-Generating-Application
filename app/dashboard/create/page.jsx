@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
+import { v4 as uuid } from "uuid";
 
 function Create() {
   const [values, setValues] = useState({
@@ -24,25 +25,40 @@ function Create() {
 
   const getVideoScript = async () => {
     setLoading(true);
-    const prompt = `Write a script to generate a ${values.duration}-second video on the topic: ${values.topic} in ${values.style} format for each scene and give me result in JSON format with image Prompt and Content text as field`;
+    const prompt = `Write a script to generate a ${values.duration}-second video on the topic:  ${values.topic} along with AI image prompt in ${values.style} format for each scene and give the result in JSON format with image_prompt, content_text, and timestamp  as fields",`;
 
-    const result = await axios
+    await axios
       .post("/api/get-video-script", {
         prompt,
+      })
+      .then(async (res) => {
+        await generateAudio(res.data.response);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const generateAudio = async (videoScript) => {
+    let audioScript = "";
+
+    videoScript.forEach((scene) => {
+      audioScript += scene.content_text + " ";
+    });
+
+    await axios
+      .post("/api/generate-audio", {
+        id: uuid(),
+        text: audioScript,
       })
       .then((res) => {
         console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
-      })
-      .finally(() => {
-        setValues({
-          topic: "",
-          style: "",
-          duration: "",
-        });
-        setLoading(false);
       });
   };
 
