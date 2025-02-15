@@ -15,7 +15,6 @@ function Create() {
     duration: "",
   });
   const [loading, setLoading] = useState(() => false);
-  const [audioURL, setAudioURL] = useState(() => null);
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -55,8 +54,21 @@ function Create() {
         id: uuid(),
         text: audioScript,
       })
+      .then(async (res) => {
+        await generateAudioCaption(res.data.message);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const generateAudioCaption = async (audioURL) => {
+    await axios
+      .post("/api/generate-caption", {
+        url: audioURL,
+      })
       .then((res) => {
-        setAudioURL(res.data.message);
+        console.log(res.data.result);
       })
       .catch((err) => {
         console.log(err);
