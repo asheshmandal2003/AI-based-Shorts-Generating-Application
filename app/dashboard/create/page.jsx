@@ -4,9 +4,10 @@ import SelectStyle from "./_components/SelectStyle";
 import SelectDuration from "./_components/SelectDuration";
 import { Button } from "@/components/ui/button";
 import { Loader2, PlusCircle } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
+import { VideoDataContext } from "@/app/_context/VideoDataContext";
 
 function Create() {
   const [values, setValues] = useState({
@@ -15,6 +16,7 @@ function Create() {
     duration: "",
   });
   const [loading, setLoading] = useState(() => false);
+  const { videoData, setVideoData } = useContext(VideoDataContext);
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -32,7 +34,10 @@ function Create() {
         prompt,
       })
       .then(async (res) => {
-        await generateAudio(res.data.response);
+        const script = res.data.response;
+        setVideoData((prevData) => ({ ...prevData, videoScript: script }));
+        await generateAudio(script);
+        await generateImage(script);
       })
       .catch((err) => {
         console.log(err);
@@ -55,6 +60,10 @@ function Create() {
         text: audioScript,
       })
       .then(async (res) => {
+        setVideoData((prevData) => ({
+          ...prevData,
+          audio: res.data.message,
+        }));
         await generateAudioCaption(res.data.message);
       })
       .catch((err) => {
@@ -68,11 +77,36 @@ function Create() {
         url: audioURL,
       })
       .then((res) => {
-        console.log(res.data.result);
+        setVideoData((prevData) => ({
+          ...prevData,
+          captions: res.data.result,
+        }));
       })
       .catch((err) => {
         console.log(err);
       });
+  };
+
+  const generateImage = async (script) => {
+    let images = [];
+    script.forEach(async (scene) => {
+      await axios
+        .post("/api/generate-image", {
+          prompt: scene?.image_prompt,
+        })
+        .then((res) => {
+          images.push(res.data.result);
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          setVideoData((prevData) => ({
+            ...prevData,
+            images: images,
+          }));
+        });
+    });
   };
 
   return (
