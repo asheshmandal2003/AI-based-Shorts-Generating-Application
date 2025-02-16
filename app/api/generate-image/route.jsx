@@ -20,11 +20,12 @@ export async function POST(req) {
 
     const input = {
       prompt,
-      height: 1280,
-      width: 1024,
+      height: 1024,
+      width: 768,
       num_outputs: 1,
     };
 
+    // Generate the image using Replicate
     const output = await replicate.run(
       "bytedance/sdxl-lightning-4step:5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
       { input }
@@ -34,28 +35,22 @@ export async function POST(req) {
       throw new Error("No output generated from the model");
     }
 
-    // Handle the ReadableStream
-    const stream = output[0];
-    const reader = stream.getReader();
-    const chunks = [];
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
+    // Fetch the image from the URL provided by Replicate
+    const imageUrl = output[0];
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
     }
 
-    // Convert the chunks to a Uint8Array
-    const imageBuffer = new Uint8Array(
-      chunks.reduce((acc, chunk) => [...acc, ...chunk], [])
-    );
+    // Convert the image to a buffer
+    const imageBuffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(imageBuffer);
 
-    const blob = new Blob([imageBuffer], { type: "image/png" });
-
+    // Upload the image to Firebase Storage
     const storageRef = ref(storage, `short-videos/${Date.now()}.png`);
-    await uploadBytes(storageRef, blob);
+    await uploadBytes(storageRef, uint8Array, { contentType: "image/png" });
 
-    // Get the download URL
+    // Get the download URL from Firebase
     const downloadURL = await getDownloadURL(storageRef);
 
     return NextResponse.json({ result: downloadURL }, { status: 200 });
