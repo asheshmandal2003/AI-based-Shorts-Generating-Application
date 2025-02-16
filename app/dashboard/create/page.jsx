@@ -88,25 +88,23 @@ function Create() {
   };
 
   const generateImage = async (script) => {
-    let images = [];
-    script.forEach(async (scene) => {
-      await axios
-        .post("/api/generate-image", {
+    const imagePromises = script.map(async (scene) => {
+      try {
+        const res = await axios.post("/api/generate-image", {
           prompt: scene?.image_prompt,
-        })
-        .then((res) => {
-          images.push(res.data.result);
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          setVideoData((prevData) => ({
-            ...prevData,
-            images: images,
-          }));
         });
+        return res.data.result;
+      } catch (err) {
+        console.log(err);
+        return null;
+      }
     });
+
+    const images = await Promise.all(imagePromises);
+    setVideoData((prevData) => ({
+      ...prevData,
+      images: images.filter((image) => image !== null),
+    }));
   };
 
   return (
