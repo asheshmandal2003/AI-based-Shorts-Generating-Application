@@ -8,6 +8,8 @@ import { useContext, useState } from "react";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
 import { VideoDataContext } from "@/app/_context/VideoDataContext";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/nextjs";
 
 function Create() {
   const [values, setValues] = useState({
@@ -17,6 +19,8 @@ function Create() {
   });
   const [loading, setLoading] = useState(() => false);
   const { videoData, setVideoData } = useContext(VideoDataContext);
+  const { toast } = useToast();
+  const { user } = useUser();
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -62,7 +66,7 @@ function Create() {
       .then(async (res) => {
         setVideoData((prevData) => ({
           ...prevData,
-          audio: res.data.message,
+          audioURL: res.data.message,
         }));
         await generateAudioCaption(res.data.message);
       })
@@ -105,6 +109,32 @@ function Create() {
       ...prevData,
       images: images.filter((image) => image !== null),
     }));
+
+    setVideoData((prevData) => ({
+      ...prevData,
+      author: user.emailAddresses[0].emailAddress,
+    }));
+    await saveVideoData();
+  };
+
+  const saveVideoData = async () => {
+    try {
+      await axios.post("/api/save-video-data", {
+        videoData,
+      });
+      toast({
+        title: "Video Data Saved",
+        description: "The video data has been saved successfully.",
+        variant: "success",
+      });
+    } catch (err) {
+      console.error("Error saving video data:", err);
+      toast({
+        title: "Error Saving Video Data",
+        description: "There was an error saving the video data.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
