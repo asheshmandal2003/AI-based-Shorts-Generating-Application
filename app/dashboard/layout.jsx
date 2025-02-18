@@ -5,7 +5,7 @@ import { VideoDataContext } from "../_context/VideoDataContext";
 import { useState } from "react";
 
 function DashboardLayout({ children }) {
-  const [videoData, setVideoData] = useState([]);
+  const [videoData, setVideoData] = useState({});
   return (
     <VideoDataContext.Provider value={{ videoData, setVideoData }}>
       <div className="min-h-screen flex flex-col">
