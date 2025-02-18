@@ -56,7 +56,7 @@ function Create() {
         await generateImage(script);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err.message.data.error);
       })
       .finally(() => {
         setLoading(false);
@@ -80,7 +80,7 @@ function Create() {
         await generateAudioCaption(res.data.message);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err.message.data.error);
       });
   };
 
@@ -93,7 +93,7 @@ function Create() {
         handleSetVideoData("captions", res.data.result);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err.message.data.error);
       });
   };
 
@@ -105,7 +105,7 @@ function Create() {
         });
         return res.data.result;
       } catch (err) {
-        console.log(err);
+        console.error(err.message.data.error);
         return null;
       }
     });
@@ -118,7 +118,6 @@ function Create() {
 
   const saveVideoData = async () => {
     setLoading(true);
-    console.log(videoData);
     try {
       await axios.post("/api/save-video-data", {
         videoData,
@@ -136,13 +135,11 @@ function Create() {
         variant: "destructive",
       });
     }
-    setVideoData({});
-    setLoading(false);
     setPlay(true);
+    setLoading(false);
   };
 
   useEffect(() => {
-    console.log(Object.keys(videoData).length);
     if (videoData && Object.keys(videoData).length === 5) {
       saveVideoData();
     }
@@ -199,7 +196,7 @@ function Create() {
           </Button>
         </div>
       </div>
-      <PlayerDialog play={play} />
+      <PlayerDialog play={play} videoData={videoData} />
     </>
   );
 }

@@ -7,20 +7,23 @@ import {
 } from "@/components/ui/dialog";
 import { Player } from "@remotion/player";
 import RemotionVideo from "./RemotionVideo";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, X } from "lucide-react";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { VideoDataContext } from "@/app/_context/VideoDataContext";
 
 function PlayerDialog({ play, videoData }) {
   const [open, setOpen] = useState(() => false);
   const [duration, setDuration] = useState(() => 100);
+  const { setVideoData } = useContext(VideoDataContext);
 
   useEffect(() => {
     setOpen(play);
   }, [play]);
 
   function handleClose() {
+    setVideoData({});
     setOpen(false);
   }
   return (

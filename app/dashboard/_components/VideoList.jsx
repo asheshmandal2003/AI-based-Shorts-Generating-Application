@@ -16,7 +16,7 @@ function VideoList({ videos }) {
   }
 
   return (
-    <div className="w-full flex flex-wrap justify-center md:justify-around sm:gap-5 md: gap-0">
+    <div className="w-full flex flex-wrap justify-center md:justify-start gap-4">
       {videos.map((video) => (
         <div
           key={video.id}
