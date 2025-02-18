@@ -15,6 +15,7 @@ import PlayerDialog from "../_components/PlayerDialog";
 function Create() {
   const [values, setValues] = useState({
     topic: "",
+    keywords: "",
     style: "",
     duration: 30,
   });
@@ -78,7 +79,14 @@ function Create() {
     if (!validateForm()) return;
 
     setLoading(true);
-    const prompt = `Write a script to generate a ${values.duration}-second video on the topic:  ${values.topic} along with AI image prompt in ${values.style} format for each scene and give the result in JSON format with image_prompt, content_text, and timestamp  as fields",`;
+
+    const prompt = `Write a script to generate a ${
+      values.duration
+    }-second video on the topic: ${values.topic}, focusing on ${
+      values.keywords === "" ? "user experience" : values.keywords
+    }. The video should have an ${
+      values.style
+    } style. For each scene, provide an AI image prompt and content text. Return the result in JSON format with the following fields: image_prompt, content_text and timestamp`;
 
     await axios
       .post("/api/get-video-script", {

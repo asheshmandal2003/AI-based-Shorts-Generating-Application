@@ -16,12 +16,9 @@ function VideoList({ videos }) {
   }
 
   return (
-    <div className="w-full flex flex-wrap justify-center md:justify-start gap-4">
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 justify-items-center">
       {videos.map((video) => (
-        <div
-          key={video.id}
-          className="rounded-lg flex flex-col items-center justify-center relative"
-        >
+        <div key={video.id} className="relative rounded-lg overflow-hidden">
           <Thumbnail
             component={RemotionVideo}
             compositionWidth={250}
@@ -33,7 +30,7 @@ function VideoList({ videos }) {
               ...video,
               setDuration: () => null,
             }}
-            className="rounded-lg cursor-pointer"
+            className="rounded-lg cursor-pointer w-full h-auto"
             onClick={() => handlePlay(video.id)}
           />
           <div

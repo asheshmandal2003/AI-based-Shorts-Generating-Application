@@ -125,7 +125,11 @@ function SelectContentType({ handleValueChange }) {
       <Select
         onValueChange={(value) => {
           setSelectedContentType(value);
-          selectedContentType !== "Custom" && handleValueChange("topic", value);
+          handleValueChange("topic", value);
+          handleValueChange(
+            "keywords",
+            contentTypes.find((c) => c.name === value).keywords.join(", ")
+          );
         }}
       >
         <SelectTrigger className="w-full">
@@ -143,7 +147,9 @@ function SelectContentType({ handleValueChange }) {
         <Textarea
           placeholder="Type your custom content here (Please provide at least 4 keywords)"
           className="mt-4"
-          onChange={(e) => handleValueChange("topic", e.target.value)}
+          onChange={(e) => {
+            handleValueChange("topic", e.target.value);
+          }}
         />
       )}
     </div>
