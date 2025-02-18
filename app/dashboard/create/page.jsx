@@ -4,7 +4,7 @@ import SelectStyle from "./_components/SelectStyle";
 import SelectDuration from "./_components/SelectDuration";
 import { Button } from "@/components/ui/button";
 import { Loader2, PlusCircle } from "lucide-react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
 import { VideoDataContext } from "@/app/_context/VideoDataContext";
@@ -29,6 +29,16 @@ function Create() {
     }));
   }
 
+  function handleSetVideoData(fieldName, fieldValue) {
+    setVideoData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [fieldName]: fieldValue,
+      };
+      return updatedData;
+    });
+  }
+
   const getVideoScript = async () => {
     setLoading(true);
     const prompt = `Write a script to generate a ${values.duration}-second video on the topic:  ${values.topic} along with AI image prompt in ${values.style} format for each scene and give the result in JSON format with image_prompt, content_text, and timestamp  as fields",`;
@@ -39,7 +49,7 @@ function Create() {
       })
       .then(async (res) => {
         const script = res.data.response;
-        setVideoData((prevData) => ({ ...prevData, videoScript: script }));
+        handleSetVideoData("videoScript", script);
         await generateAudio(script);
         await generateImage(script);
       })
@@ -64,10 +74,7 @@ function Create() {
         text: audioScript,
       })
       .then(async (res) => {
-        setVideoData((prevData) => ({
-          ...prevData,
-          audioURL: res.data.message,
-        }));
+        handleSetVideoData("audioURL", res.data.message);
         await generateAudioCaption(res.data.message);
       })
       .catch((err) => {
@@ -81,10 +88,7 @@ function Create() {
         url: audioURL,
       })
       .then((res) => {
-        setVideoData((prevData) => ({
-          ...prevData,
-          captions: res.data.result,
-        }));
+        handleSetVideoData("captions", res.data.result);
       })
       .catch((err) => {
         console.log(err);
@@ -105,19 +109,14 @@ function Create() {
     });
 
     const images = await Promise.all(imagePromises);
-    setVideoData((prevData) => ({
-      ...prevData,
-      images: images.filter((image) => image !== null),
-    }));
 
-    setVideoData((prevData) => ({
-      ...prevData,
-      author: user.emailAddresses[0].emailAddress,
-    }));
-    await saveVideoData();
+    handleSetVideoData("images", images);
+    handleSetVideoData("author", user.emailAddresses[0].emailAddress);
   };
 
   const saveVideoData = async () => {
+    setLoading(true);
+    console.log(videoData);
     try {
       await axios.post("/api/save-video-data", {
         videoData,
@@ -135,7 +134,17 @@ function Create() {
         variant: "destructive",
       });
     }
+    setVideoData({});
+    setLoading(false);
   };
+
+  useEffect(() => {
+    console.log(videoData);
+    console.log(Object.keys(videoData).length);
+    if (videoData && Object.keys(videoData).length === 5) {
+      saveVideoData();
+    }
+  }, [videoData]);
 
   return (
     <div>
