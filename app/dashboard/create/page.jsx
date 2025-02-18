@@ -51,7 +51,6 @@ function Create() {
       })
       .then(async (res) => {
         const script = res.data.response;
-        handleSetVideoData("videoScript", script);
         await generateAudio(script);
         await generateImage(script);
       })
@@ -140,7 +139,7 @@ function Create() {
   };
 
   useEffect(() => {
-    if (videoData && Object.keys(videoData).length === 5) {
+    if (videoData && Object.keys(videoData).length === 4) {
       saveVideoData();
     }
   }, [videoData]);

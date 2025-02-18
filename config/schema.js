@@ -25,7 +25,6 @@ export const Users = pgTable(
 
 export const Video = pgTable("video", {
   id: serial("id").primaryKey(),
-  videoScript: json("script").notNull(),
   audioURL: varchar("audio_url").notNull(),
   captions: json("captions").notNull(),
   images: varchar("images").array(),

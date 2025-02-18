@@ -8,10 +8,10 @@ export async function POST(req) {
 
     if (
       !videoData ||
-      !videoData?.videoScript ||
       !videoData?.audioURL ||
       !videoData?.captions ||
-      !videoData?.images
+      !videoData?.images ||
+      !videoData?.author
     ) {
       return NextResponse.json(
         { error: "Video Data is required" },
