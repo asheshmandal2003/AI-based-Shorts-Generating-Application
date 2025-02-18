@@ -22,7 +22,7 @@ function Create() {
   const { videoData, setVideoData } = useContext(VideoDataContext);
   const { toast } = useToast();
   const { user } = useUser();
-  const [play, setPlay] = useState(() => true);
+  const [play, setPlay] = useState(() => false);
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -138,10 +138,10 @@ function Create() {
     }
     setVideoData({});
     setLoading(false);
+    setPlay(true);
   };
 
   useEffect(() => {
-    console.log(videoData);
     console.log(Object.keys(videoData).length);
     if (videoData && Object.keys(videoData).length === 5) {
       saveVideoData();

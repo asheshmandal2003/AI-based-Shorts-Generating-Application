@@ -9,13 +9,7 @@ import {
   interpolate,
 } from "remotion";
 
-function RemotionVideo({
-  videoScript,
-  audioURL,
-  captions,
-  images,
-  setDuration,
-}) {
+function RemotionVideo({ audioURL, captions, images, setDuration }) {
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame();
 
