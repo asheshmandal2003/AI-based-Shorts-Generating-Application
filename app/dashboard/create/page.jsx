@@ -10,6 +10,7 @@ import { v4 as uuid } from "uuid";
 import { VideoDataContext } from "@/app/_context/VideoDataContext";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
+import PlayerDialog from "../_components/PlayerDialog";
 
 function Create() {
   const [values, setValues] = useState({
@@ -21,6 +22,7 @@ function Create() {
   const { videoData, setVideoData } = useContext(VideoDataContext);
   const { toast } = useToast();
   const { user } = useUser();
+  const [play, setPlay] = useState(() => true);
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -147,55 +149,58 @@ function Create() {
   }, [videoData]);
 
   return (
-    <div>
-      <h1 className="font-bold text-2xl mb-8">Create a New Short Video</h1>
-      <div className="flex flex-col gap-10 p-6 border border-gray-200 rounded-lg mb-10">
-        <div>
-          <h2 className="font-semibold text-xl mb-1">
-            Content
-            <span className="text-red-500">*</span>
-          </h2>
-          <p className="text-sm text-gray-500 italic mb-4">
-            Please select the type of content you need.
-          </p>
-          <SelectContentType handleValueChange={handleValueChange} />
-        </div>
+    <>
+      <div>
+        <h1 className="font-bold text-2xl mb-8">Create a New Short Video</h1>
+        <div className="flex flex-col gap-10 p-6 border border-gray-200 rounded-lg mb-10">
+          <div>
+            <h2 className="font-semibold text-xl mb-1">
+              Content
+              <span className="text-red-500">*</span>
+            </h2>
+            <p className="text-sm text-gray-500 italic mb-4">
+              Please select the type of content you need.
+            </p>
+            <SelectContentType handleValueChange={handleValueChange} />
+          </div>
 
-        <div>
-          <h2 className="font-semibold text-xl mb-1">
-            Style
-            <span className="text-red-500">*</span>
-          </h2>
-          <p className="text-sm text-gray-500 italic mb-4">
-            Please select a style for your content.
-          </p>
-          <SelectStyle handleValueChange={handleValueChange} />
-        </div>
+          <div>
+            <h2 className="font-semibold text-xl mb-1">
+              Style
+              <span className="text-red-500">*</span>
+            </h2>
+            <p className="text-sm text-gray-500 italic mb-4">
+              Please select a style for your content.
+            </p>
+            <SelectStyle handleValueChange={handleValueChange} />
+          </div>
 
-        <div>
-          <h2 className="font-semibold text-xl mb-1">
-            Duration
-            <span className="text-red-500">*</span>
-          </h2>
-          <p className="text-sm text-gray-500 italic mb-4">
-            Please select the duration of your content.
-          </p>
-          <SelectDuration handleValueChange={handleValueChange} />
-        </div>
+          <div>
+            <h2 className="font-semibold text-xl mb-1">
+              Duration
+              <span className="text-red-500">*</span>
+            </h2>
+            <p className="text-sm text-gray-500 italic mb-4">
+              Please select the duration of your content.
+            </p>
+            <SelectDuration handleValueChange={handleValueChange} />
+          </div>
 
-        <Button size="lg" onClick={() => getVideoScript()} disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin" /> Generating Video
-            </>
-          ) : (
-            <>
-              <PlusCircle /> Generate Video
-            </>
-          )}
-        </Button>
+          <Button size="lg" onClick={() => getVideoScript()} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" /> Generating Video
+              </>
+            ) : (
+              <>
+                <PlusCircle /> Generate Video
+              </>
+            )}
+          </Button>
+        </div>
       </div>
-    </div>
+      <PlayerDialog play={play} />
+    </>
   );
 }
 
