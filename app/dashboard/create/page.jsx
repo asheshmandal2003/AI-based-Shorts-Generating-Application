@@ -16,8 +16,14 @@ function Create() {
   const [values, setValues] = useState({
     topic: "",
     style: "",
-    duration: "",
+    duration: 30,
   });
+
+  const [errors, setErrors] = useState({
+    topic: "",
+    style: "",
+  });
+
   const [loading, setLoading] = useState(() => false);
   const { videoData, setVideoData } = useContext(VideoDataContext);
   const { toast } = useToast();
@@ -28,6 +34,10 @@ function Create() {
     setValues((prevValues) => ({
       ...prevValues,
       [fieldName]: fieldValue,
+    }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [fieldName]: "",
     }));
   }
 
@@ -41,7 +51,32 @@ function Create() {
     });
   }
 
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    if (values.topic == "Custom") {
+      newErrors.topic = "Tell the AI what you want by entering a prompt.";
+      isValid = false;
+    }
+
+    if (!values.topic.trim() || values.topic.length < 4) {
+      newErrors.topic = "Topic is required!";
+      isValid = false;
+    }
+
+    if (!values.style) {
+      newErrors.style = "Style is required!";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const getVideoScript = async () => {
+    if (!validateForm()) return;
+
     setLoading(true);
     const prompt = `Write a script to generate a ${values.duration}-second video on the topic:  ${values.topic} along with AI image prompt in ${values.style} format for each scene and give the result in JSON format with image_prompt, content_text, and timestamp  as fields",`;
 
@@ -158,6 +193,9 @@ function Create() {
               Please select the type of content you need.
             </p>
             <SelectContentType handleValueChange={handleValueChange} />
+            {errors.topic && (
+              <p className="text-red-500 text-sm mt-2">{errors.topic}</p>
+            )}
           </div>
 
           <div>
@@ -169,6 +207,9 @@ function Create() {
               Please select a style for your content.
             </p>
             <SelectStyle handleValueChange={handleValueChange} />
+            {errors.style && (
+              <p className="text-red-500 text-sm mt-2">{errors.style}</p>
+            )}
           </div>
 
           <div>
