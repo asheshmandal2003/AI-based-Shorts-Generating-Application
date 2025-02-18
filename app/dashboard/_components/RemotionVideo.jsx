@@ -6,6 +6,7 @@ import {
   useVideoConfig,
   Audio,
   useCurrentFrame,
+  interpolate,
 } from "remotion";
 
 function RemotionVideo({
@@ -38,27 +39,38 @@ function RemotionVideo({
 
   return (
     <AbsoluteFill className="bg-black rounded-md">
-      {images?.map((img, idx) => (
-        <Sequence
-          key={idx}
-          from={(idx * duration) / images.length}
-          durationInFrames={duration}
-        >
-          <Img
-            src={img}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-          <AbsoluteFill className="flex flex-col justify-end">
-            <p className="max-w-fit bg-black bg-opacity-70 text-white text-sm px-2 py-1 rounded-md mb-3 mx-2 transition-all duration-500">
-              {currentCaption}
-            </p>
-          </AbsoluteFill>
-        </Sequence>
-      ))}
+      {images?.map((img, idx) => {
+        const start = (idx * duration) / images.length;
+        const scale = (idx) =>
+          interpolate(
+            frame,
+            [start, (start + duration) / 2, start + duration],
+            idx % 2 == 0 ? [1, 1.3, 1] : [1.3, 1, 1.3],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            }
+          );
+
+        return (
+          <Sequence key={idx} from={start} durationInFrames={duration}>
+            <Img
+              src={img}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: `scale(${scale(idx)})`,
+              }}
+            />
+            <AbsoluteFill className="flex flex-col justify-end">
+              <p className="max-w-fit bg-black bg-opacity-70 text-white text-sm px-2 py-1 rounded-md mb-3 mx-2 transition-all duration-500">
+                {currentCaption}
+              </p>
+            </AbsoluteFill>
+          </Sequence>
+        );
+      })}
       <Audio src={audioURL} />
     </AbsoluteFill>
   );
