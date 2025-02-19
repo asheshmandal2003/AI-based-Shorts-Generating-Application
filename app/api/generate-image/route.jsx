@@ -1,5 +1,6 @@
 import Replicate from "replicate";
 import { NextResponse } from "next/server";
+import { redis } from "@/config/redis";
 const { ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const { storage } = require("../../../config/firebase/firebaseConfig");
 
@@ -16,6 +17,11 @@ export async function POST(req) {
         { error: "Prompt is required" },
         { status: 400 }
       );
+    }
+
+    const cachedImage = await redis.get(prompt);
+    if (cachedImage) {
+      return NextResponse.json({ result: cachedImage }, { status: 200 });
     }
 
     const input = {
@@ -53,7 +59,9 @@ export async function POST(req) {
     // Get the download URL from Firebase
     const downloadURL = await getDownloadURL(storageRef);
 
-    return NextResponse.json({ result: downloadURL }, { status: 200 });
+    await redis.set(prompt, downloadURL, "EX", 86400);
+
+    return NextResponse.json({ result: downloadURL }, { status: 201 });
   } catch (error) {
     console.error("Error generating image:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });

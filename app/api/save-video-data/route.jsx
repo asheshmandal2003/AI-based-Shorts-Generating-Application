@@ -1,6 +1,28 @@
 import { db } from "@/config/db";
+import { redis } from "@/config/redis";
 import { Video } from "@/config/schema";
 import { NextResponse } from "next/server";
+
+async function saveVideoToDB(videoData) {
+  const validVideoData = {
+    audioURL: videoData.audioURL,
+    captions: videoData.captions,
+    images: videoData.images,
+    author: videoData.author,
+  };
+  await db.insert(Video).values(validVideoData);
+}
+
+async function updateRedisCache(author, videoData) {
+  let videos = await redis.get(author);
+  if (videos) {
+    videos = await JSON.parse(videos);
+    videos.push(videoData);
+    await redis.set(author, JSON.stringify(videos), "EX", 3600);
+  } else {
+    await redis.set(author, JSON.stringify([videoData]), "EX", 3600);
+  }
+}
 
 export async function POST(req) {
   try {
@@ -19,7 +41,9 @@ export async function POST(req) {
       );
     }
 
-    await db.insert(Video).values(videoData);
+    await saveVideoToDB(videoData);
+
+    await updateRedisCache(videoData.author, videoData);
 
     return NextResponse.json({ message: "Video Data Saved" }, { status: 201 });
   } catch (error) {
