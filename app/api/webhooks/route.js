@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { db } from "@/config/db";
 import { Users } from "@/config/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET;
@@ -54,30 +55,19 @@ export async function POST(req) {
   const eventType = evt.type;
 
   if (eventType === "user.created") {
-    console.log(
-      evt.data.id,
-      `${evt.data.first_name} ${evt.data.last_name}`,
-      evt.data.email_addresses[0].email_address,
-      evt.data.image_url
-    );
     return saveUser(
       evt.data.id,
       `${evt.data.first_name} ${evt.data.last_name}`,
       evt.data.email_addresses[0].email_address,
       evt.data.image_url
     );
-  }
-
-  if (eventType === "user.updated") {
+  } else if (eventType === "user.updated") {
     return updateUser(
-      evt.data.id,
       `${evt.data.first_name} ${evt.data.last_name}`,
       evt.data.email_addresses[0].email_address,
       evt.data.image_url
     );
-  }
-
-  if (eventType === "user.deleted") {
+  } else if (eventType === "user.deleted") {
     return deleteUser(evt.data.id);
   }
 
@@ -115,7 +105,7 @@ async function updateUser(id, name, email, imageUrl) {
         email,
         imageUrl,
       })
-      .where({ id });
+      .where(eq(Users.id, id));
 
     return new NextResponse(
       { message: "User updated" },
@@ -131,7 +121,7 @@ async function updateUser(id, name, email, imageUrl) {
 async function deleteUser(id) {
   // Delete user from database
   try {
-    await db.delete(Users).where({ id });
+    await db.delete(Users).where(eq(Users.id, id));
 
     return new NextResponse(
       { message: "User deleted" },
