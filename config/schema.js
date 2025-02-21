@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  integer,
   json,
   pgTable,
   serial,
@@ -10,11 +11,12 @@ import {
 export const Users = pgTable(
   "users",
   {
-    id: serial("id").primaryKey(),
+    id: varchar("id").primaryKey(),
     name: varchar("name").notNull(),
     email: varchar("email").unique().notNull(),
     imageUrl: varchar("image_url"),
     subscription: boolean("subscription").default(false),
+    credits: integer("credits").default(30),
   },
   (table) => {
     return {

@@ -15,6 +15,13 @@
       "when": 1739904608287,
       "tag": "0001_keen_chameleon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1740161580790,
+      "tag": "0002_brainy_betty_ross",
+      "breakpoints": true
     }
   ]
 }

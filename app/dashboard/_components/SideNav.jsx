@@ -20,13 +20,13 @@ function SideNav() {
     {
       id: 3,
       name: "Upgrade",
-      path: "/upgrade",
+      path: "/dashboard/upgrade",
       icon: <Star />,
     },
     {
       id: 4,
       name: "Account",
-      path: "/account",
+      path: "/dashboard/account",
       icon: <User />,
     },
   ];
