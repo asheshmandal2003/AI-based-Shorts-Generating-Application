@@ -11,6 +11,7 @@ import { VideoDataContext } from "@/app/_context/VideoDataContext";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import PlayerDialog from "../_components/PlayerDialog";
+import { CreditsContext } from "@/app/_context/CreditsContext";
 
 function Create() {
   const [values, setValues] = useState({
@@ -27,9 +28,11 @@ function Create() {
 
   const [loading, setLoading] = useState(() => false);
   const { videoData, setVideoData } = useContext(VideoDataContext);
+  const [videoDataStore, setVideoDataStore] = useState(() => {});
   const { toast } = useToast();
   const { user } = useUser();
   const [play, setPlay] = useState(() => false);
+  const { setCredits } = useContext(CreditsContext);
 
   function handleValueChange(fieldName, fieldValue) {
     setValues((prevValues) => ({
@@ -75,6 +78,19 @@ function Create() {
     return isValid;
   };
 
+  function resetForm() {
+    setValues({
+      topic: "",
+      keywords: "",
+      style: "",
+      duration: 30,
+    });
+    setErrors({
+      topic: "",
+      style: "",
+    });
+  }
+
   const getVideoScript = async () => {
     if (!validateForm()) return;
 
@@ -88,20 +104,35 @@ function Create() {
       values.style
     } style. For each scene, provide an AI image prompt and content text. Return the result in JSON format with the following fields: image_prompt, content_text and timestamp`;
 
+    const { id } = user;
+
     await axios
-      .post("/api/get-video-script", {
-        prompt,
-      })
+      .post(
+        "/api/get-video-script",
+        {
+          prompt,
+        },
+        {
+          params: {
+            id,
+          },
+        }
+      )
       .then(async (res) => {
         const script = res.data.response;
         await generateAudio(script);
         await generateImage(script);
       })
       .catch((err) => {
-        console.error(err.message.data.error);
+        toast({
+          title: "Error Generating Video Script",
+          description: err.response.data.error,
+          variant: "destructive",
+        });
       })
       .finally(() => {
         setLoading(false);
+        resetForm();
       });
   };
 
@@ -122,7 +153,12 @@ function Create() {
         await generateAudioCaption(res.data.message);
       })
       .catch((err) => {
-        console.error(err.message.data.error);
+        toast({
+          title: "Error Generating Audio",
+          description: err.response.data.error,
+          variant: "destructive",
+        });
+        resetForm();
       });
   };
 
@@ -135,7 +171,12 @@ function Create() {
         handleSetVideoData("captions", res.data.result);
       })
       .catch((err) => {
-        console.error(err.message.data.error);
+        toast({
+          title: "Error Generating Audio Caption",
+          description: err.response.data.error,
+          variant: "destructive",
+        });
+        resetForm();
       });
   };
 
@@ -147,7 +188,12 @@ function Create() {
         });
         return res.data.result;
       } catch (err) {
-        console.error(err.message.data.error);
+        toast({
+          title: "Error Generating Image",
+          description: err.response.data.error,
+          variant: "destructive",
+        });
+        resetForm();
         return null;
       }
     });
@@ -170,7 +216,6 @@ function Create() {
         variant: "success",
       });
     } catch (err) {
-      console.error("Error saving video data:", err);
       toast({
         title: "Error Saving Video Data",
         description: "There was an error saving the video data.",
@@ -179,6 +224,10 @@ function Create() {
     }
     setPlay(true);
     setLoading(false);
+    setCredits((prevCredits) => prevCredits - 10);
+    resetForm();
+    setVideoDataStore(videoData);
+    setVideoData({});
   };
 
   useEffect(() => {
@@ -244,7 +293,7 @@ function Create() {
           </Button>
         </div>
       </div>
-      <PlayerDialog play={play} videoData={videoData} />
+      <PlayerDialog play={play} videoData={videoDataStore} />
     </>
   );
 }

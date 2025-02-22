@@ -1,6 +1,7 @@
 import { db } from "@/config/db";
 import { redis } from "@/config/redis";
-import { Video } from "@/config/schema";
+import { Users, Video } from "@/config/schema";
+import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 async function saveVideoToDB(videoData) {
@@ -10,7 +11,11 @@ async function saveVideoToDB(videoData) {
     images: videoData.images,
     author: videoData.author,
   };
-  await db.insert(Video).values(validVideoData);
+  const video = await db
+    .insert(Video)
+    .values(validVideoData)
+    .returning({ id: Video.id });
+  return video[0].id;
 }
 
 async function updateRedisCache(author, videoData) {
@@ -41,9 +46,21 @@ export async function POST(req) {
       );
     }
 
-    await saveVideoToDB(videoData);
+    const id = await saveVideoToDB(videoData);
 
-    await updateRedisCache(videoData.author, videoData);
+    await db
+      .update(Users)
+      .set({
+        credits: sql`${Users.credits} - 10`,
+      })
+      .where(eq(Users.email, videoData.author));
+
+    await updateRedisCache(videoData.author, {
+      id,
+      audioURL: videoData.audioURL,
+      captions: videoData.captions,
+      images: videoData.images,
+    });
 
     return NextResponse.json({ message: "Video Data Saved" }, { status: 201 });
   } catch (error) {

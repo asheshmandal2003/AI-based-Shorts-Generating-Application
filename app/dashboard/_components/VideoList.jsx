@@ -17,8 +17,8 @@ function VideoList({ videos }) {
 
   return (
     <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 justify-items-center">
-      {videos.map((video) => (
-        <div key={video.id} className="relative rounded-lg overflow-hidden">
+      {videos.map((video, idx) => (
+        <div key={idx} className="relative rounded-lg overflow-hidden">
           <Thumbnail
             component={RemotionVideo}
             compositionWidth={250}

@@ -18,7 +18,6 @@ function Dashboard() {
     const abortController = new AbortController();
 
     const fetchVideos = async () => {
-      console.log("called");
       try {
         const response = await axios.get("/api/get-videos", {
           params: {
