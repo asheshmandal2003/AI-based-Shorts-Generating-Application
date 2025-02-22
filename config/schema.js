@@ -5,6 +5,7 @@ import {
   json,
   pgTable,
   serial,
+  timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -31,4 +32,13 @@ export const Video = pgTable("video", {
   captions: json("captions").notNull(),
   images: varchar("images").array(),
   author: varchar("author").notNull(),
+});
+
+export const Payments = pgTable("payments", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => Users.id),
+  amount: integer("amount").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
