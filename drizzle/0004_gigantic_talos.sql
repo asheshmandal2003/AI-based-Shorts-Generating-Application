@@ -1,0 +1,1 @@
+ALTER TABLE "video" ADD CONSTRAINT "video_author_users_email_fk" FOREIGN KEY ("author") REFERENCES "public"."users"("email") ON DELETE no action ON UPDATE no action;

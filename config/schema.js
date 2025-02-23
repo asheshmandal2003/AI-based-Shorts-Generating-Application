@@ -31,7 +31,9 @@ export const Video = pgTable("video", {
   audioURL: varchar("audio_url").notNull(),
   captions: json("captions").notNull(),
   images: varchar("images").array(),
-  author: varchar("author").notNull(),
+  author: varchar("author")
+    .notNull()
+    .references(() => Users.email),
 });
 
 export const Payments = pgTable("payments", {
