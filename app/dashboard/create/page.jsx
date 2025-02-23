@@ -239,7 +239,9 @@ function Create() {
   return (
     <>
       <div>
-        <h1 className="font-bold text-2xl mb-8">Create a New Short Video</h1>
+        <h1 className="font-bold text-2xl mt-5 mb-8">
+          Create a New Short Video
+        </h1>
         <div className="flex flex-col gap-10 p-6 border border-gray-200 rounded-lg mb-10">
           <div>
             <h2 className="font-semibold text-xl mb-1">

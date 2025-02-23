@@ -14,10 +14,11 @@ function DashboardLayout({ children }) {
         <div className="min-h-screen flex flex-col">
           <Header />
           <div className="flex flex-1">
-            <div className="hidden md:block md:w-1/5 border-r-2">
+            <div className="hidden md:block md:w-80 border-r-2 min-h-screen fixed">
               <SideNav />
             </div>
-            <div className="flex-1 px-6 py-4">{children}</div>
+
+            <div className="flex-1 px-10 py-4 md:ml-80">{children}</div>
           </div>
         </div>
       </VideoDataContext.Provider>

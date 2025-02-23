@@ -3,16 +3,19 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { UserButton, useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { Loader, PanelsLeftBottom, Star } from "lucide-react";
-import Image from "next/image";
+import { Menu, PanelsLeftBottom } from "lucide-react";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
+import SideMenu from "./SideMenu";
+import Logo from "./Logo";
+import Credits from "./Credits";
 
 function Header() {
   const { user, isLoaded } = useUser();
   const { credits, setCredits } = useContext(CreditsContext);
   const { toast } = useToast();
   const [loading, setLoading] = useState(() => true);
+  const [open, setOpen] = useState(() => false);
 
   async function fetchCredits() {
     if (!isLoaded || !user) return;
@@ -47,28 +50,32 @@ function Header() {
   }, [isLoaded, user]);
 
   return (
-    <div className="px-6 py-4 flex justify-between items-center bg-white shadow-md">
-      <div className="flex justify-center items-center gap-2">
-        <Image src="/logo.svg" alt="Logo" width={35} height={35} />
-        <h1 className="font-bold text-xl">ShortsBot</h1>
-      </div>
-      <div className="flex justify-center items-center gap-4 ">
-        <div className="flex justify-center items-center gap-2 border border-gray-300 rounded-sm px-3 py-1">
-          <Star className="text-yellow-400" />
-          {loading ? (
-            <Loader className="text-gray-400 animate-spin" />
-          ) : (
-            <p className="font-bold text-yellow-500">{credits}</p>
-          )}
+    <>
+      <div className="px-6 py-4 flex justify-between items-center bg-white shadow-md sticky top-0 z-50">
+        <Logo />
+        <div className="hidden md:flex justify-center items-center gap-4 ">
+          <Credits credits={credits} loading={loading} />
+          <Link href="/dashboard">
+            <Button>
+              <PanelsLeftBottom /> Dashboard
+            </Button>
+          </Link>
+          <UserButton />
         </div>
-        <Link href="/dashboard">
-          <Button>
-            <PanelsLeftBottom /> Dashboard
-          </Button>
-        </Link>
-        <UserButton />
+        <div className="md:hidden">
+          <Menu
+            className="cursor-pointer"
+            onClick={() => setOpen((prev) => !prev)}
+          />
+        </div>
       </div>
-    </div>
+      <SideMenu
+        open={open}
+        setOpen={setOpen}
+        credits={credits}
+        loading={loading}
+      />
+    </>
   );
 }
 

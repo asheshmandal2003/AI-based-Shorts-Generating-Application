@@ -43,7 +43,7 @@ function Dashboard() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-5">
+      <div className="flex justify-between items-center mb-5 mt-5">
         <h1 className="font-bold text-2xl">Dashboard</h1>
         <Link href="/dashboard/create">
           <Button variant="secondary">

@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import PlanCard from "./_components/PlanCard";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CreditsContext } from "@/app/_context/CreditsContext";
 
 const plans = [
@@ -44,6 +44,7 @@ function Upgrade() {
   const { toast } = useToast();
   const { user } = useUser();
   const { setCredits } = useContext(CreditsContext);
+  const [loading, setLoading] = useState(() => null);
 
   const createOrderId = async (amount) => {
     try {
@@ -63,7 +64,8 @@ function Upgrade() {
     }
   };
 
-  const processPayment = async (amount) => {
+  const processPayment = async (id, amount) => {
+    setLoading(id);
     try {
       const orderId = await createOrderId(amount);
       if (!orderId) return;
@@ -140,6 +142,7 @@ function Upgrade() {
         variant: "destructive",
       });
     }
+    setLoading(null);
   };
 
   return (
@@ -156,9 +159,8 @@ function Upgrade() {
             planType={plan.name}
             price={plan.price}
             features={plan.features}
-            processPayment={(id) => {
-              plan.id === id ? processPayment(plan.price) : null;
-            }}
+            processPayment={() => processPayment(plan.id, plan.price)}
+            loading={loading}
           />
         ))}
       </div>

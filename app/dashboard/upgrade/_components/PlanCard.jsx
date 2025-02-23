@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
-import { CircleCheck, ShoppingBag } from "lucide-react";
+import { CircleCheck, Loader2, ShoppingBag } from "lucide-react";
 
-function PlanCard({ id, planType, price, features, processPayment }) {
+function PlanCard({ id, planType, price, features, processPayment, loading }) {
   return (
     <div className="border border-gray-300 rounded-md px-6 py-3">
       <p className="text-lg font-semibold">{planType}</p>
@@ -23,8 +23,21 @@ function PlanCard({ id, planType, price, features, processPayment }) {
           Applied
         </Button>
       ) : (
-        <Button className="my-10 w-full" onClick={() => processPayment(id)}>
-          <ShoppingBag /> Purchase
+        <Button
+          className="my-10 w-full"
+          onClick={() => processPayment()}
+          disabled={loading === id}
+        >
+          {loading === id ? (
+            <>
+              <Loader2 className="animate-spin" /> Purchasing{" "}
+            </>
+          ) : (
+            <>
+              {" "}
+              <ShoppingBag /> Purchase
+            </>
+          )}
         </Button>
       )}
     </div>
