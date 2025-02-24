@@ -25,7 +25,7 @@ function VideoList({ videos }) {
             compositionHeight={400}
             frameToDisplay={30}
             durationInFrames={1}
-            fps={30}
+            fps={15}
             inputProps={{
               ...video,
               setDuration: () => null,

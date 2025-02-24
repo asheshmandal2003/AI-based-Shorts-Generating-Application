@@ -8,31 +8,36 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import VideoList from "./_components/VideoList";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Dashboard() {
   const [videos, setVideos] = useState(() => []);
-  const { user } = useUser();
+  const { isLoaded, user } = useUser();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(() => true);
+
+  const fetchVideos = async () => {
+    try {
+      const response = await axios.get("/api/get-videos", {
+        params: {
+          email: user.emailAddresses[0].emailAddress,
+        },
+      });
+      setVideos(response.data.result);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching videos",
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const abortController = new AbortController();
+    if (!user || !isLoaded) return;
 
-    const fetchVideos = async () => {
-      try {
-        const response = await axios.get("/api/get-videos", {
-          params: {
-            email: user.emailAddresses[0].emailAddress,
-          },
-        });
-        setVideos(response.data.result);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "An error occurred while fetching videos",
-          variant: "destructive",
-        });
-      }
-    };
+    const abortController = new AbortController();
 
     fetchVideos();
 
@@ -52,7 +57,13 @@ function Dashboard() {
           </Button>
         </Link>
       </div>
-      {videos.length === 0 ? <EmptyList /> : <VideoList videos={videos} />}
+      {loading ? (
+        <Skeleton className="h-[400px] w-[250px] rounded-lg" />
+      ) : videos.length === 0 ? (
+        <EmptyList />
+      ) : (
+        <VideoList videos={videos} />
+      )}
     </div>
   );
 }
