@@ -4,8 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import PlanCard from "./_components/PlanCard";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CreditsContext } from "@/app/_context/CreditsContext";
+import TransactionsTable from "./_components/TransactionsTable";
 
 const plans = [
   {
@@ -42,9 +43,10 @@ const plans = [
 
 function Upgrade() {
   const { toast } = useToast();
-  const { user } = useUser();
+  const { isLoaded, user } = useUser();
   const { setCredits } = useContext(CreditsContext);
   const [loading, setLoading] = useState(() => null);
+  const [transactions, setTransactions] = useState(() => []);
 
   const createOrderId = async (amount) => {
     try {
@@ -145,6 +147,35 @@ function Upgrade() {
     setLoading(null);
   };
 
+  async function fetchTransactions() {
+    if (!isLoaded || !user) return;
+    const userId = user.id;
+
+    await axios
+      .get("/api/get-transactions", {
+        params: { userId },
+      })
+      .then((res) => {
+        setTransactions(res.data.result);
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description:
+            err.response?.data?.error || "Failed to fetch transactions!",
+          variant: "destructive",
+        });
+      });
+  }
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    fetchTransactions();
+    return () => {
+      abortController;
+    };
+  }, [isLoaded, user]);
+
   return (
     <div className="flex flex-col justify-center items-center">
       <p className="font-bold text-2xl mt-5">Choose your plan</p>
@@ -164,6 +195,9 @@ function Upgrade() {
           />
         ))}
       </div>
+      {transactions.length > 0 && (
+        <TransactionsTable transactions={transactions} />
+      )}
     </div>
   );
 }

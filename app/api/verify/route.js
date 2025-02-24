@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { db } from "@/config/db";
 import { Payments, Users } from "@/config/schema";
 import { eq, sql } from "drizzle-orm";
+import { redis } from "@/config/redis";
 
 const generateSignature = (orderId, paymentId) => {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -77,6 +78,8 @@ async function handleSubscription(razorpayPaymentId, userId, amount) {
       amount,
     });
 
+    await redis.del(`transactions:${userId}`);
+
     await db
       .update(Users)
       .set({
@@ -84,6 +87,8 @@ async function handleSubscription(razorpayPaymentId, userId, amount) {
         credits: sql`${Users.credits} + ${amount === 999 ? 1000 : 2000}`,
       })
       .where(eq(Users.id, userId));
+
+    await redis.del(`credits:${userId}`);
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error", isOk: false, error: error.message },
